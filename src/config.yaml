@@ -1,0 +1,6 @@
+jira:
+  instance_url: "https://your-jira-instance.com"
+  api_token: "your-api-token"
+
+elements_connect:
+  custom_field_name: "Theme Selection"

@@ -1,28 +1,46 @@
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.issue.Issue
 import com.atlassian.jira.issue.link.IssueLinkManager
+import com.atlassian.jira.event.type.EventDispatchOption
 
-def issueManager = ComponentAccessor.issueManager
-def issueLinkManager = ComponentAccessor.issueLinkManager
-def customFieldManager = ComponentAccessor.customFieldManager
+class LinkSync {
 
-def epicIssue = issueManager.getIssueObject("EPIC-123") // Az Epic issue azonosítója
-def themeField = customFieldManager.getCustomFieldObjectByName("Theme Selection")
-def selectedTheme = epicIssue.getCustomFieldValue(themeField) as Issue
+    static void synchronizeLink(Issue epicIssue, Issue selectedTheme) {
+        IssueLinkManager issueLinkManager = ComponentAccessor.issueLinkManager
 
-if (selectedTheme) {
-    def existingLink = issueLinkManager.getIssueLinks(epicIssue.id).find { it.destinationObject == selectedTheme }
+        try {
+            List existingLink = issueLinkManager.getIssueLinks(epicIssue.id).find { it.destinationObject == selectedTheme }
 
-    if (!existingLink) {
-        issueLinkManager.createIssueLink(epicIssue.id, selectedTheme.id, issueLinkManager.getIssueLinkType(10000), null, ComponentAccessor.jiraAuthenticationContext.loggedInUser)
-        log.info("Kapcsolat létrehozva: ${epicIssue.key} -> ${selectedTheme.key}")
+            if (!existingLink) {
+                issueLinkManager.createIssueLink(
+                    epicIssue.id,
+                    selectedTheme.id,
+                    issueLinkManager.getIssueLinkType(10000),
+                    null,
+                    ComponentAccessor.jiraAuthenticationContext.loggedInUser
+                )
+                log.info("Link created: ${epicIssue.key} -> ${selectedTheme.key}")
+            }
+        } catch (Exception e) {
+            log.error("Failed to create issue link: ${e.message}", e)
+        }
     }
-}
 
-// Ha a kapcsolat törlődik, frissítsük a mezőt is
-def linkedThemes = issueLinkManager.getIssueLinks(epicIssue.id).findAll { it.issueLinkType.name == "Parent-Child" }
-if (!linkedThemes) {
-    epicIssue.setCustomFieldValue(themeField, null)
-    issueManager.updateIssue(ComponentAccessor.jiraAuthenticationContext.loggedInUser, epicIssue, EventDispatchOption.DO_NOT_DISPATCH, false)
-    log.info("Theme mező törölve az Epicben: ${epicIssue.key}")
+    static void clearThemeField(Issue epicIssue) {
+        def customFieldManager = ComponentAccessor.customFieldManager
+        CustomField themeField = customFieldManager.getCustomFieldObjectsByName("Theme Selection").find()
+
+        try {
+            epicIssue.setCustomFieldValue(themeField, null)
+            ComponentAccessor.issueManager.updateIssue(
+                ComponentAccessor.jiraAuthenticationContext.loggedInUser,
+                epicIssue,
+                EventDispatchOption.DO_NOT_DISPATCH,
+                false
+            )
+            log.info("Theme field cleared for Epic: ${epicIssue.key}")
+        } catch (Exception e) {
+            log.error("Failed to clear Theme field: ${e.message}", e)
+        }
+    }
 }

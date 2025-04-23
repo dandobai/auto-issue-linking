@@ -1,21 +1,21 @@
-import com.atlassian.jira.event.type.EventTypeManager
-import com.atlassian.jira.issue.IssueEvent
 import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.issue.Issue
+import com.atlassian.jira.issue.fields.CustomField
 
-def eventTypeManager = ComponentAccessor.getComponent(EventTypeManager)
-def issueManager = ComponentAccessor.issueManager
+class EventListener {
 
-def eventType = eventTypeManager.getEventType(event.eventTypeId)
+    static void handleIssueUpdatedEvent(Issue issue) {
+        def customFieldManager = ComponentAccessor.customFieldManager
+        CustomField themeField = customFieldManager.getCustomFieldObjectsByName("Theme Selection").find()
+        Issue selectedTheme = issue.getCustomFieldValue(themeField) as Issue
 
-if (eventType.name == "Issue Updated") {
-    def issue = event.issue
-    def customFieldManager = ComponentAccessor.customFieldManager
-    def themeField = customFieldManager.getCustomFieldObjectByName("Theme Selection")
-    def selectedTheme = issue.getCustomFieldValue(themeField) as Issue
-    
-    if (selectedTheme) {
-        log.info("Issue módosítva: ${issue.key} - Theme: ${selectedTheme.key}")
-        // Meghívja a link_sync.groovy scriptet
-        new File("src/link_sync.groovy").execute()
+        if (selectedTheme) {
+            log.info("Issue updated: ${issue.key}, Theme: ${selectedTheme.key}")
+            LinkSync.synchronizeLink(issue, selectedTheme)
+        }
     }
 }
+
+// Assuming this script is triggered upon "Issue Updated" event:
+Issue issue = event.issue
+EventListener.handleIssueUpdatedEvent(issue)

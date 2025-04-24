@@ -28,19 +28,26 @@ class LinkSync {
 
     static void clearThemeField(Issue epicIssue) {
         def customFieldManager = ComponentAccessor.customFieldManager
-        CustomField themeField = customFieldManager.getCustomFieldObjectsByName("Theme Selection").find()
 
-        try {
-            epicIssue.setCustomFieldValue(themeField, null)
-            ComponentAccessor.issueManager.updateIssue(
-                ComponentAccessor.jiraAuthenticationContext.loggedInUser,
-                epicIssue,
-                EventDispatchOption.DO_NOT_DISPATCH,
-                false
-            )
-            log.info("Theme field cleared for Epic: ${epicIssue.key}")
-        } catch (Exception e) {
-            log.error("Failed to clear Theme field: ${e.message}", e)
+        // Retrieve all custom fields and find the one with the desired name
+        CustomField themeField = customFieldManager.getCustomFieldObjects()
+            .find { it.name == "Theme Selection" }
+
+        if (themeField) {
+            try {
+                epicIssue.setCustomFieldValue(themeField, null)
+                ComponentAccessor.issueManager.updateIssue(
+                    ComponentAccessor.jiraAuthenticationContext.loggedInUser,
+                    epicIssue,
+                    EventDispatchOption.DO_NOT_DISPATCH,
+                    false
+                )
+                log.info("Theme field cleared for Epic: ${epicIssue.key}")
+            } catch (Exception e) {
+                log.error("Failed to clear Theme field: ${e.message}", e)
+            }
+        } else {
+            log.warn("Theme field not found for Epic: ${epicIssue.key}")
         }
     }
 }

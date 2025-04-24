@@ -5,7 +5,7 @@ import com.atlassian.jira.issue.link.IssueLinkManager
 class JiraUtils {
 
     static Issue getIssueByKey(String issueKey) {
-        def issueManager = ComponentAccessor.issueManager
+        IssueLinkManager issueManager = ComponentAccessor.issueManager
         return issueManager.getIssueObject(issueKey)
     }
 

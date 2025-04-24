@@ -6,12 +6,18 @@ class EventListener {
 
     static void handleIssueUpdatedEvent(Issue issue) {
         def customFieldManager = ComponentAccessor.customFieldManager
-        CustomField themeField = customFieldManager.getCustomFieldObjectsByName("Theme Selection").find()
-        Issue selectedTheme = issue.getCustomFieldValue(themeField) as Issue
 
-        if (selectedTheme) {
-            log.info("Issue updated: ${issue.key}, Theme: ${selectedTheme.key}")
-            LinkSync.synchronizeLink(issue, selectedTheme)
+        // Retrieve all custom fields and find the one with the desired name
+        CustomField themeField = customFieldManager.getCustomFieldObjects()
+            .find { it.name == "Theme Selection" }
+
+        if (themeField) {
+            Issue selectedTheme = issue.getCustomFieldValue(themeField) as Issue
+
+            if (selectedTheme) {
+                log.info("Issue updated: ${issue.key}, Theme: ${selectedTheme.key}")
+                LinkSync.synchronizeLink(issue, selectedTheme)
+            }
         }
     }
 }

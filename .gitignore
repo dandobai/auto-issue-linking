@@ -1,0 +1,45 @@
+# Ignore IDE-specific files and folders
+.idea/
+*.iml
+
+# Node.js dependencies (if applicable)
+node_modules/
+npm-debug.log*
+
+# Python dependencies (if applicable)
+__pycache__/
+*.py[cod]
+requirements.txt
+
+# MacOS and Windows system files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Shell script logs
+*.sh~
+
+# Temporary files
+*.bak
+*.swp
+
+# Coverage reports
+.coverage
+coverage/
+
+# Build output directories
+dist/
+build/
+target/
+
+# Configuration backups or sensitive data
+*.yaml~
+config.yaml
+
+# Ignore documentation builds (if generated)
+docs/_build/
+
+# Ignore all the groovy script backups
+*.groovy~

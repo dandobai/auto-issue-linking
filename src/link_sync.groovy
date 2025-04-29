@@ -1,3 +1,4 @@
+import com.atlassian.extras.common.log.Logger
 import com.atlassian.jira.bc.issue.link.IssueLinkService
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.issue.Issue
@@ -6,6 +7,7 @@ import com.atlassian.jira.issue.link.IssueLinkManager
 import com.atlassian.jira.event.type.EventDispatchOption
 
 class LinkSync {
+    static final Logger log = Logger.getLogger(EventListener)
 
     static void createIssueLink(Issue epicIssue, Issue selectedTheme) {
         def issueLinkService = ComponentAccessor.getComponent(IssueLinkService)

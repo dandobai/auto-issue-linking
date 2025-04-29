@@ -1,9 +1,12 @@
+import com.atlassian.extras.common.log.Logger
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.issue.Issue
 import com.atlassian.jira.issue.fields.CustomField
 import com.atlassian.event.api.EventListener
 
 class EventListener {
+
+    static final Logger log = Logger.getLogger(EventListener)
 
     @EventListener
     static void handleIssueUpdatedEvent(Issue issue) {

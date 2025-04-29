@@ -1,38 +1,29 @@
+import com.atlassian.jira.bc.issue.link.IssueLinkService
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.issue.Issue
-import com.atlassian.jira.issue.link.IssueLinkManager
-
 class JiraUtils {
 
     static Issue getIssueByKey(String issueKey) {
-        IssueLinkManager issueManager = ComponentAccessor.issueManager
-        return issueManager.getIssueObject(issueKey)
+        return ComponentAccessor.issueManager.getIssueObject(issueKey)
     }
 
-    static void createLink(Issue epic, Issue theme) {
-        IssueLinkManager issueLinkManager = ComponentAccessor.issueLinkManager
-        try {
-            issueLinkManager.createIssueLink(
-                epic.id,
-                theme.id,
-                issueLinkManager.getIssueLinkType(10000),
-                null,
-                ComponentAccessor.jiraAuthenticationContext.loggedInUser
-            )
-            log.info("Link created successfully: ${epic.key} -> ${theme.key}")
-        } catch (Exception e) {
-            log.error("Failed to create link: ${e.message}", e)
-        }
-    }
+    static void removeIssueLink(Issue epic, Issue theme) {
+        def issueLinkService = ComponentAccessor.getComponent(IssueLinkService)
+        def user = ComponentAccessor.jiraAuthenticationContext.loggedInUser
 
-    static void removeLink(Issue epic, Issue theme) {
-        IssueLinkManager issueLinkManager = ComponentAccessor.issueLinkManager
         try {
-            def links = issueLinkManager.getIssueLinks(epic.id).findAll { it.destinationObject == theme }
-            links.each { issueLinkManager.removeIssueLink(it) }
-            log.info("Link removed successfully: ${epic.key} -> ${theme.key}")
+            def links = ComponentAccessor.issueLinkManager.getIssueLinks(epic.id).findAll { it.destinationObject == theme }
+            links.each { link ->
+                def validationResult = issueLinkService.validateDeleteIssueLink(user, link.id)
+                if (validationResult.isValid()) {
+                    issueLinkService.deleteIssueLink(user, validationResult)
+                    log.info("Link removed successfully: ${epic.key} -> ${theme.key}")
+                } else {
+                    log.warn("Failed to remove link: ${validationResult.errorCollection}")
+                }
+            }
         } catch (Exception e) {
-            log.error("Failed to remove link: ${e.message}", e)
+            log.error("Error removing issue link: ${e.message}", e)
         }
     }
 }

@@ -1,8 +1,10 @@
+import com.atlassian.extras.common.log.Logger
 import com.atlassian.jira.bc.issue.link.IssueLinkService
 import com.atlassian.jira.component.ComponentAccessor
 import com.atlassian.jira.issue.Issue
 class JiraUtils {
 
+    static final Logger log = Logger.getLogger(EventListener)
     static Issue getIssueByKey(String issueKey) {
         return ComponentAccessor.issueManager.getIssueObject(issueKey)
     }

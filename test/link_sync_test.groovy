@@ -34,6 +34,6 @@ class LinkSyncTest {
         def fieldValue = epic.getCustomFieldValue(themeField)
 
         // Ellenőrzés - A mező értéke null
-        assertNull("Theme field should be cleared", fieldValue)
+        assertNull("Theme field should be cleared", fieldValue) // 1 assertnek jo, de arra is kivancsi hogy a theme nel is megjelent epic es forditva TODO
     }
 }
